@@ -1,0 +1,2624 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
+  >
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <title>기억력 게임</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      touch-action: manipulation;
+      -webkit-text-size-adjust: 100%;
+      overscroll-behavior: none;
+    }
+
+    body {
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Noto Sans KR",
+        "Malgun Gothic",
+        Arial,
+        sans-serif;
+
+      background: #f4f4fa;
+      color: #20202a;
+
+      min-height: 100vh;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      padding: 20px;
+
+      touch-action: manipulation;
+    }
+
+    button {
+      font-family: inherit;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .game-container {
+      position: relative;
+
+      width: min(100%, 900px);
+
+      background: #ffffff;
+
+      border-radius: 28px;
+
+      padding: 28px 32px 30px;
+
+      box-shadow:
+        0 15px 45px rgba(50, 50, 100, 0.10);
+
+      touch-action: manipulation;
+    }
+
+    /* =========================
+       상단
+    ========================= */
+
+    .top-area {
+      position: relative;
+
+      display: flex;
+      justify-content: center;
+
+      margin-bottom: 18px;
+    }
+
+    .best-time {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+
+      min-width: 270px;
+
+      padding: 12px 25px;
+
+      background: #fafaff;
+
+      border: 2px solid #dedee8;
+
+      border-radius: 13px;
+
+      font-size: 20px;
+      font-weight: 800;
+
+      color: #20202a;
+    }
+
+    .best-time .trophy {
+      font-size: 24px;
+    }
+
+    .best-time-value {
+      color: #5b5bd6;
+    }
+
+    /* =========================
+       일시정지
+    ========================= */
+
+    .pause-button {
+      position: absolute;
+
+      right: 0;
+      top: 50%;
+
+      transform: translateY(-50%);
+
+      width: 58px;
+      height: 58px;
+
+      border-radius: 50%;
+
+      border: 2px solid #d8d8e4;
+
+      background: #ffffff;
+
+      color: #20202a;
+
+      font-size: 25px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      cursor: pointer;
+
+      transition: 0.2s;
+
+      touch-action: manipulation;
+    }
+
+    .pause-button:hover {
+      background: #eeeeff;
+      border-color: #5b5bd6;
+      color: #5b5bd6;
+    }
+
+    /* =========================
+       정보
+    ========================= */
+
+    .info-grid {
+      display: grid;
+
+      grid-template-columns: repeat(3, 1fr);
+
+      gap: 14px;
+
+      margin-bottom: 17px;
+    }
+
+    .info-box {
+      min-height: 90px;
+
+      background: #ffffff;
+
+      border: 2px solid #dedee8;
+
+      border-radius: 13px;
+
+      display: flex;
+      flex-direction: column;
+
+      justify-content: center;
+      align-items: center;
+    }
+
+    .info-title {
+      font-size: 16px;
+
+      font-weight: 700;
+
+      color: #555560;
+
+      margin-bottom: 5px;
+    }
+
+    .info-value {
+      font-size: 30px;
+
+      line-height: 1;
+
+      font-weight: 800;
+
+      color: #20202a;
+    }
+
+    /* =========================
+       진행도
+    ========================= */
+
+    .progress-section {
+      display: grid;
+
+      grid-template-columns: auto 1fr auto;
+
+      align-items: center;
+
+      gap: 12px;
+
+      margin-bottom: 20px;
+    }
+
+    .progress-label {
+      font-size: 18px;
+
+      font-weight: 800;
+
+      white-space: nowrap;
+    }
+
+    .progress-bar {
+      height: 13px;
+
+      background: #eeeeF3;
+
+      border-radius: 30px;
+
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+
+      width: 0%;
+
+      background: #5b5bd6;
+
+      border-radius: 30px;
+
+      transition: width 0.3s ease;
+    }
+
+    .progress-percent {
+      font-size: 18px;
+
+      font-weight: 800;
+
+      min-width: 48px;
+
+      text-align: right;
+    }
+
+    /* =========================
+       카드
+    ========================= */
+
+    .board-wrapper {
+      width: 100%;
+
+      display: flex;
+
+      justify-content: center;
+
+      margin-bottom: 22px;
+    }
+
+    .game-board {
+      width: min(100%, 680px);
+
+      display: grid;
+
+      aspect-ratio: 1 / 1;
+
+      touch-action: manipulation;
+    }
+
+    .game-board.size-4 {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .game-board.size-6 {
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+    }
+
+    .game-board.size-8 {
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px;
+    }
+
+    .game-board.size-10 {
+      grid-template-columns: repeat(10, 1fr);
+      gap: 5px;
+    }
+
+    .card {
+      border: none;
+
+      background: transparent;
+
+      padding: 0;
+
+      min-width: 0;
+      min-height: 0;
+
+      cursor: pointer;
+
+      perspective: 800px;
+
+      touch-action: manipulation;
+
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .card-inner {
+      position: relative;
+
+      width: 100%;
+      height: 100%;
+
+      transform-style: preserve-3d;
+
+      transition: transform 0.32s ease;
+    }
+
+    .card.flipped .card-inner,
+    .card.matched .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-front,
+    .card-back {
+      position: absolute;
+
+      inset: 0;
+
+      display: flex;
+
+      justify-content: center;
+      align-items: center;
+
+      border-radius: 10px;
+
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    .card-front {
+      background: #f0f0f6;
+
+      border: 2px solid #d8d8e3;
+
+      color: #777783;
+    }
+
+    .card-front::before {
+      content: "?";
+
+      font-size: clamp(18px, 4vw, 38px);
+
+      font-weight: 700;
+
+      color: #8a8a96;
+    }
+
+    .card-back {
+      background: #ffffff;
+
+      border: 2px solid #5b5bd6;
+
+      transform: rotateY(180deg);
+
+      font-size: clamp(18px, 4vw, 38px);
+    }
+
+    .card.matched .card-back {
+      background: #eeeeff;
+
+      border-color: #9999e8;
+    }
+
+    .game-board.size-8 .card-front,
+    .game-board.size-8 .card-back {
+      border-radius: 7px;
+    }
+
+    .game-board.size-10 .card-front,
+    .game-board.size-10 .card-back {
+      border-radius: 5px;
+
+      border-width: 1px;
+    }
+
+    .game-board.size-10 .card-front::before {
+      font-size: clamp(10px, 2.5vw, 24px);
+    }
+
+    .game-board.size-10 .card-back {
+      font-size: clamp(10px, 2.5vw, 24px);
+    }
+
+    /* =========================
+       하단 버튼
+    ========================= */
+
+    .bottom-controls {
+      display: grid;
+
+      grid-template-columns: 1fr 1fr;
+
+      gap: 18px;
+    }
+
+    .bottom-button {
+      min-height: 58px;
+
+      border-radius: 13px;
+
+      border: 2px solid #dedee8;
+
+      background: #ffffff;
+
+      color: #20202a;
+
+      font-size: 17px;
+
+      font-weight: 800;
+
+      cursor: pointer;
+
+      transition: 0.2s;
+
+      touch-action: manipulation;
+    }
+
+    .bottom-button:hover {
+      border-color: #5b5bd6;
+
+      background: #eeeeff;
+
+      color: #5b5bd6;
+    }
+
+    .difficulty-button {
+      display: flex;
+
+      align-items: center;
+      justify-content: center;
+
+      gap: 8px;
+    }
+
+    .arrow {
+      font-size: 13px;
+    }
+
+    .message {
+      text-align: center;
+
+      min-height: 20px;
+
+      margin-top: 12px;
+
+      color: #777783;
+
+      font-size: 13px;
+    }
+
+    /* =========================
+       팝업
+    ========================= */
+
+    .overlay {
+      position: fixed;
+
+      inset: 0;
+
+      z-index: 1000;
+
+      background: rgba(25, 25, 45, 0.62);
+
+      display: none;
+
+      align-items: center;
+      justify-content: center;
+
+      padding: 20px;
+
+      touch-action: manipulation;
+    }
+
+    .popup {
+      width: min(100%, 430px);
+
+      background: #ffffff;
+
+      border-radius: 24px;
+
+      padding: 28px;
+
+      box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.2);
+
+      text-align: center;
+    }
+
+    .popup-icon {
+      font-size: 48px;
+
+      margin-bottom: 7px;
+    }
+
+    .popup h2 {
+      font-size: 26px;
+
+      margin-bottom: 9px;
+
+      color: #20202a;
+    }
+
+    .popup-description {
+      color: #777783;
+
+      font-size: 14px;
+
+      line-height: 1.6;
+
+      margin-bottom: 20px;
+    }
+
+    /* =========================
+       난이도
+    ========================= */
+
+    .difficulty-list {
+      display: grid;
+
+      grid-template-columns: 1fr 1fr;
+
+      gap: 10px;
+
+      margin-bottom: 18px;
+    }
+
+    .difficulty-item {
+      border: 2px solid #dedee8;
+
+      background: #ffffff;
+
+      border-radius: 13px;
+
+      padding: 14px 10px;
+
+      cursor: pointer;
+
+      transition: 0.2s;
+
+      touch-action: manipulation;
+    }
+
+    .difficulty-item:hover {
+      border-color: #5b5bd6;
+    }
+
+    .difficulty-item.selected {
+      border-color: #5b5bd6;
+
+      background: #eeeeff;
+    }
+
+    .difficulty-name {
+      display: block;
+
+      font-size: 16px;
+
+      font-weight: 800;
+
+      margin-bottom: 4px;
+    }
+
+    .difficulty-record {
+      display: block;
+
+      font-size: 12px;
+
+      color: #777783;
+    }
+
+    .primary-button {
+      width: 100%;
+
+      min-height: 54px;
+
+      border: none;
+
+      border-radius: 13px;
+
+      background: #5b5bd6;
+
+      color: #ffffff;
+
+      font-size: 17px;
+
+      font-weight: 800;
+
+      cursor: pointer;
+
+      transition: 0.2s;
+
+      touch-action: manipulation;
+    }
+
+    .primary-button:hover {
+      background: #4646b8;
+    }
+
+    /* =========================
+       결과
+    ========================= */
+
+    .result-box {
+      background: #f7f7fc;
+
+      border-radius: 15px;
+
+      padding: 14px 17px;
+
+      margin-bottom: 14px;
+    }
+
+    .result-row {
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      padding: 7px 0;
+
+      font-size: 14px;
+
+      color: #777783;
+    }
+
+    .result-row strong {
+      color: #20202a;
+
+      font-size: 17px;
+    }
+
+    .record-message {
+      display: none;
+
+      background: #eeeeff;
+
+      color: #4646b8;
+
+      padding: 11px;
+
+      border-radius: 11px;
+
+      font-weight: 800;
+
+      font-size: 14px;
+
+      margin-bottom: 14px;
+    }
+
+    /* =========================
+       모바일
+    ========================= */
+
+    @media (max-width: 650px) {
+
+      body {
+        padding: 8px;
+
+        align-items: flex-start;
+      }
+
+      .game-container {
+        padding: 18px 13px 18px;
+
+        border-radius: 20px;
+
+        margin-top: 5px;
+      }
+
+      .top-area {
+        margin-bottom: 13px;
+      }
+
+      .best-time {
+        min-width: 210px;
+
+        padding: 10px 15px;
+
+        font-size: 16px;
+      }
+
+      .best-time .trophy {
+        font-size: 19px;
+      }
+
+      .pause-button {
+        width: 46px;
+        height: 46px;
+
+        font-size: 20px;
+      }
+
+      .info-grid {
+        gap: 7px;
+
+        margin-bottom: 12px;
+      }
+
+      .info-box {
+        min-height: 72px;
+
+        border-radius: 10px;
+      }
+
+      .info-title {
+        font-size: 11px;
+
+        margin-bottom: 5px;
+      }
+
+      .info-value {
+        font-size: 22px;
+      }
+
+      .progress-section {
+        gap: 7px;
+
+        margin-bottom: 13px;
+      }
+
+      .progress-label,
+      .progress-percent {
+        font-size: 13px;
+      }
+
+      .progress-percent {
+        min-width: 36px;
+      }
+
+      .progress-bar {
+        height: 9px;
+      }
+
+      .game-board {
+        width: 100%;
+      }
+
+      .game-board.size-4 {
+        gap: 6px;
+      }
+
+      .game-board.size-6 {
+        gap: 4px;
+      }
+
+      .game-board.size-8 {
+        gap: 3px;
+      }
+
+      .game-board.size-10 {
+        gap: 2px;
+      }
+
+      .card-front,
+      .card-back {
+        border-radius: 6px;
+      }
+
+      .bottom-controls {
+        gap: 8px;
+      }
+
+      .bottom-button {
+        min-height: 50px;
+
+        font-size: 14px;
+
+        border-radius: 10px;
+      }
+
+      .message {
+        font-size: 12px;
+
+        margin-top: 8px;
+      }
+
+      .popup {
+        padding: 24px 18px;
+
+        border-radius: 20px;
+      }
+
+      .popup h2 {
+        font-size: 23px;
+      }
+
+      .difficulty-list {
+        gap: 7px;
+      }
+
+      .difficulty-item {
+        padding: 11px 7px;
+      }
+
+      .difficulty-name {
+        font-size: 14px;
+      }
+
+      .difficulty-record {
+        font-size: 10px;
+      }
+    }
+
+    @media (max-width: 380px) {
+
+      .game-container {
+        padding-left: 9px;
+        padding-right: 9px;
+      }
+
+      .best-time {
+        min-width: 185px;
+
+        font-size: 14px;
+
+        padding: 9px 11px;
+      }
+
+      .pause-button {
+        width: 42px;
+        height: 42px;
+
+        font-size: 18px;
+      }
+
+      .info-value {
+        font-size: 19px;
+      }
+
+      .progress-label,
+      .progress-percent {
+        font-size: 11px;
+      }
+
+      .bottom-button {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================
+       게임 화면
+  ========================= -->
+
+  <main class="game-container">
+
+    <div class="top-area">
+
+      <div class="best-time">
+
+        <span class="trophy">🏆</span>
+
+        <span>최저시간</span>
+
+        <span
+          class="best-time-value"
+          id="bestTime">
+          없음
+        </span>
+
+      </div>
+
+      <button
+        class="pause-button"
+        id="pauseButton"
+        aria-label="일시정지">
+        ⏸️
+      </button>
+
+    </div>
+
+
+    <div class="info-grid">
+
+      <div class="info-box">
+
+        <div class="info-title">
+          시도
+        </div>
+
+        <div
+          class="info-value"
+          id="attempts">
+          0
+        </div>
+
+      </div>
+
+
+      <div class="info-box">
+
+        <div class="info-title">
+          맞춘쌍
+        </div>
+
+        <div
+          class="info-value"
+          id="matches">
+          0 / 8
+        </div>
+
+      </div>
+
+
+      <div class="info-box">
+
+        <div class="info-title">
+          시간
+        </div>
+
+        <div
+          class="info-value"
+          id="timer">
+          00:00
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="progress-section">
+
+      <div class="progress-label">
+        진행도
+      </div>
+
+      <div class="progress-bar">
+
+        <div
+          class="progress-fill"
+          id="progressFill">
+        </div>
+
+      </div>
+
+      <div
+        class="progress-percent"
+        id="progressPercent">
+        0%
+      </div>
+
+    </div>
+
+
+    <div class="board-wrapper">
+
+      <div
+        class="game-board size-4"
+        id="gameBoard">
+      </div>
+
+    </div>
+
+
+    <div class="bottom-controls">
+
+      <button
+        class="bottom-button"
+        id="restartButton">
+        ↻ 다시 시작
+      </button>
+
+
+      <button
+        class="bottom-button difficulty-button"
+        id="difficultyButton">
+
+        🎮 난이도:
+
+        <span id="difficultyText">
+          4×4
+        </span>
+
+        <span class="arrow">
+          ▼
+        </span>
+
+      </button>
+
+    </div>
+
+
+    <div
+      class="message"
+      id="message">
+      같은 그림의 카드를 찾아보세요!
+    </div>
+
+  </main>
+
+
+  <!-- =========================
+       처음 난이도 선택
+  ========================= -->
+
+  <div
+    class="overlay"
+    id="startOverlay">
+
+    <div class="popup">
+
+      <div class="popup-icon">
+        🧠
+      </div>
+
+      <h2>
+        기억력 게임
+      </h2>
+
+      <p class="popup-description">
+        난이도를 선택하고<br>
+        같은 그림의 카드를 찾아보세요!
+      </p>
+
+
+      <div class="difficulty-list">
+
+        <button
+          class="difficulty-item selected"
+          data-size="4">
+
+          <span class="difficulty-name">
+            4×4
+          </span>
+
+          <span
+            class="difficulty-record"
+            id="startRecord4">
+            최저시간: 없음
+          </span>
+
+        </button>
+
+
+        <button
+          class="difficulty-item"
+          data-size="6">
+
+          <span class="difficulty-name">
+            6×6
+          </span>
+
+          <span
+            class="difficulty-record"
+            id="startRecord6">
+            최저시간: 없음
+          </span>
+
+        </button>
+
+
+        <button
+          class="difficulty-item"
+          data-size="8">
+
+          <span class="difficulty-name">
+            8×8
+          </span>
+
+          <span
+            class="difficulty-record"
+            id="startRecord8">
+            최저시간: 없음
+          </span>
+
+        </button>
+
+
+        <button
+          class="difficulty-item"
+          data-size="10">
+
+          <span class="difficulty-name">
+            10×10
+          </span>
+
+          <span
+            class="difficulty-record"
+            id="startRecord10">
+            최저시간: 없음
+          </span>
+
+        </button>
+
+      </div>
+
+
+      <button
+        class="primary-button"
+        id="startButton">
+        🎮 게임 시작
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       난이도 변경
+  ========================= -->
+
+  <div
+    class="overlay"
+    id="difficultyOverlay">
+
+    <div class="popup">
+
+      <div class="popup-icon">
+        🎮
+      </div>
+
+      <h2>
+        난이도 선택
+      </h2>
+
+      <p class="popup-description">
+        플레이할 난이도를 선택하세요.
+      </p>
+
+
+      <div class="difficulty-list">
+
+        <button
+          class="difficulty-item"
+          data-change-size="4">
+
+          <span class="difficulty-name">
+            4×4
+          </span>
+
+          <span
+            class="difficulty-record"
+            id="changeRecord4">
+            최저시간: 없음
+          </span>
+
+        </button>
+
+
+        <button
+          class="difficulty-item"
+          data-change-size="6">
+
+          <span class="difficulty-name">
+            6×6
+          </span>
+
+          <span
+            class="difficulty-record"
+            id="changeRecord6">
+            최저시간: 없음
+          </span>
+
+        </button>
+
+
+        <button
+          class="difficulty-item"
+          data-change-size="8">
+
+          <span class="difficulty-name">
+            8×8
+          </span>
+
+          <span
+            class="difficulty-record"
+            id="changeRecord8">
+            최저시간: 없음
+          </span>
+
+        </button>
+
+
+        <button
+          class="difficulty-item"
+          data-change-size="10">
+
+          <span class="difficulty-name">
+            10×10
+          </span>
+
+          <span
+            class="difficulty-record"
+            id="changeRecord10">
+            최저시간: 없음
+          </span>
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       일시정지
+  ========================= -->
+
+  <div
+    class="overlay"
+    id="pauseOverlay">
+
+    <div class="popup">
+
+      <div class="popup-icon">
+        ⏸️
+      </div>
+
+      <h2>
+        일시정지
+      </h2>
+
+      <p class="popup-description">
+        게임이 잠시 멈췄습니다.
+      </p>
+
+      <button
+        class="primary-button"
+        id="resumeButton">
+        ▶️ 계속하기
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       게임 클리어
+  ========================= -->
+
+  <div
+    class="overlay"
+    id="resultOverlay">
+
+    <div class="popup">
+
+      <div class="popup-icon">
+        🎉
+      </div>
+
+      <h2>
+        게임 클리어!
+      </h2>
+
+
+      <div class="result-box">
+
+        <div class="result-row">
+
+          <span>
+            난이도
+          </span>
+
+          <strong id="resultDifficulty">
+            4×4
+          </strong>
+
+        </div>
+
+
+        <div class="result-row">
+
+          <span>
+            기록
+          </span>
+
+          <strong id="resultTime">
+            00:00
+          </strong>
+
+        </div>
+
+
+        <div class="result-row">
+
+          <span>
+            시도
+          </span>
+
+          <strong id="resultAttempts">
+            0회
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="record-message"
+        id="recordMessage">
+
+        🏆 새로운 최저시간 기록!
+
+      </div>
+
+
+      <button
+        class="primary-button"
+        id="resultRestartButton">
+
+        ↻ 다시 도전하기
+
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <script>
+
+    /* =========================
+       카드 그림
+    ========================= */
+
+    const emojis = [
+      "🍎", "🍕", "🚀", "🐶", "🌈",
+      "⚽", "🎮", "🦊", "🍩", "🌻",
+      "🐱", "🎵", "🐼", "🍔", "⭐",
+      "🚗", "🦄", "🍉", "🐸", "🍓",
+      "🐵", "🍌", "🌙", "☀️", "🔥",
+      "❄️", "🌸", "🍀", "🎈", "🎲",
+      "🐰", "🐻", "🐨", "🐯", "🦁",
+      "🐷", "🐮", "🐔", "🦋", "🐢",
+      "🍇", "🍊", "🍋", "🥝", "🥑",
+      "🍒", "🥕", "🌽", "🍪", "🍰"
+    ];
+
+
+    /* =========================
+       게임 변수
+    ========================= */
+
+    let boardSize = 4;
+
+    let pairCount = 8;
+
+    let flippedCards = [];
+
+    let matchedPairs = 0;
+
+    let attempts = 0;
+
+    let elapsedTime = 0;
+
+    let timerInterval = null;
+
+    let gameStarted = false;
+
+    let gamePaused = false;
+
+    let boardLocked = false;
+
+    let mismatchTimeout = null;
+
+
+    /* =========================
+       요소
+    ========================= */
+
+    const gameBoard =
+      document.getElementById("gameBoard");
+
+    const attemptsElement =
+      document.getElementById("attempts");
+
+    const matchesElement =
+      document.getElementById("matches");
+
+    const timerElement =
+      document.getElementById("timer");
+
+    const bestTimeElement =
+      document.getElementById("bestTime");
+
+    const progressFill =
+      document.getElementById("progressFill");
+
+    const progressPercent =
+      document.getElementById("progressPercent");
+
+    const difficultyText =
+      document.getElementById("difficultyText");
+
+    const messageElement =
+      document.getElementById("message");
+
+    const pauseButton =
+      document.getElementById("pauseButton");
+
+    const restartButton =
+      document.getElementById("restartButton");
+
+    const difficultyButton =
+      document.getElementById("difficultyButton");
+
+    const startOverlay =
+      document.getElementById("startOverlay");
+
+    const difficultyOverlay =
+      document.getElementById("difficultyOverlay");
+
+    const pauseOverlay =
+      document.getElementById("pauseOverlay");
+
+    const resultOverlay =
+      document.getElementById("resultOverlay");
+
+    const startButton =
+      document.getElementById("startButton");
+
+    const resumeButton =
+      document.getElementById("resumeButton");
+
+    const resultRestartButton =
+      document.getElementById(
+        "resultRestartButton"
+      );
+
+    const resultDifficulty =
+      document.getElementById(
+        "resultDifficulty"
+      );
+
+    const resultTime =
+      document.getElementById(
+        "resultTime"
+      );
+
+    const resultAttempts =
+      document.getElementById(
+        "resultAttempts"
+      );
+
+    const recordMessage =
+      document.getElementById(
+        "recordMessage"
+      );
+
+
+    /* =========================
+       최저시간 저장소
+       
+       중요:
+       게임 기록과 별도로 저장되며
+       웹앱을 다시 열어도 유지됩니다.
+    ========================= */
+
+    const BEST_RECORDS_KEY =
+      "memoryGameBestRecords_v1";
+
+
+    /*
+      저장된 최저시간을 불러옵니다.
+      기존 데이터가 없으면 빈 객체를 사용합니다.
+    */
+
+    function loadBestRecords() {
+
+      try {
+
+        const saved =
+          localStorage.getItem(
+            BEST_RECORDS_KEY
+          );
+
+        if (!saved) {
+          return {};
+        }
+
+        const parsed =
+          JSON.parse(saved);
+
+        if (
+          parsed &&
+          typeof parsed === "object"
+        ) {
+
+          return parsed;
+
+        }
+
+        return {};
+
+      } catch (error) {
+
+        console.warn(
+          "최저시간 기록을 불러오지 못했습니다.",
+          error
+        );
+
+        return {};
+
+      }
+
+    }
+
+
+    /*
+      최저시간 기록을 저장합니다.
+    */
+
+    function saveBestRecords(records) {
+
+      try {
+
+        localStorage.setItem(
+          BEST_RECORDS_KEY,
+          JSON.stringify(records)
+        );
+
+      } catch (error) {
+
+        console.warn(
+          "최저시간 기록을 저장하지 못했습니다.",
+          error
+        );
+
+      }
+
+    }
+
+
+    /*
+      페이지를 다시 열어도 유지되는
+      최저시간 기록 객체
+    */
+
+    let bestRecords =
+      loadBestRecords();
+
+
+    /* =========================
+       시간 표시
+    ========================= */
+
+    function formatTime(seconds) {
+
+      const minutes =
+        Math.floor(seconds / 60);
+
+      const secs =
+        seconds % 60;
+
+      return (
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(secs).padStart(2, "0")
+      );
+
+    }
+
+
+    /* =========================
+       최저시간 가져오기
+    ========================= */
+
+    function getBestTime(size) {
+
+      const record =
+        bestRecords[String(size)];
+
+      if (
+        record === undefined ||
+        record === null ||
+        !Number.isFinite(Number(record))
+      ) {
+
+        return null;
+
+      }
+
+      return Number(record);
+
+    }
+
+
+    /* =========================
+       최저시간 저장
+    ========================= */
+
+    function saveBestTime(size, time) {
+
+      bestRecords[String(size)] =
+        Number(time);
+
+      saveBestRecords(bestRecords);
+
+    }
+
+
+    /* =========================
+       현재 난이도의 기록 표시
+    ========================= */
+
+    function updateBestTime() {
+
+      const record =
+        getBestTime(boardSize);
+
+
+      if (record === null) {
+
+        bestTimeElement.textContent =
+          "없음";
+
+      } else {
+
+        bestTimeElement.textContent =
+          formatTime(record);
+
+      }
+
+    }
+
+
+    /* =========================
+       모든 난이도 기록 표시
+    ========================= */
+
+    function updateAllRecords() {
+
+      [4, 6, 8, 10].forEach(size => {
+
+        const record =
+          getBestTime(size);
+
+
+        const text =
+          record === null
+            ? "최저시간: 없음"
+            : `최저시간: ${formatTime(record)}`;
+
+
+        const startRecord =
+          document.getElementById(
+            `startRecord${size}`
+          );
+
+        const changeRecord =
+          document.getElementById(
+            `changeRecord${size}`
+          );
+
+
+        if (startRecord) {
+
+          startRecord.textContent =
+            text;
+
+        }
+
+
+        if (changeRecord) {
+
+          changeRecord.textContent =
+            text;
+
+        }
+
+      });
+
+    }
+
+
+    /* =========================
+       난이도 설정
+    ========================= */
+
+    function setDifficulty(size) {
+
+      boardSize = size;
+
+      pairCount =
+        (size * size) / 2;
+
+      difficultyText.textContent =
+        `${size}×${size}`;
+
+      matchesElement.textContent =
+        `0 / ${pairCount}`;
+
+      updateBestTime();
+
+    }
+
+
+    /* =========================
+       카드 섞기
+    ========================= */
+
+    function shuffle(array) {
+
+      const result =
+        [...array];
+
+
+      for (
+        let i = result.length - 1;
+        i > 0;
+        i--
+      ) {
+
+        const j =
+          Math.floor(
+            Math.random() * (i + 1)
+          );
+
+
+        [
+          result[i],
+          result[j]
+        ] =
+        [
+          result[j],
+          result[i]
+        ];
+
+      }
+
+
+      return result;
+
+    }
+
+
+    /* =========================
+       게임 생성
+    ========================= */
+
+    function createGame() {
+
+      clearInterval(
+        timerInterval
+      );
+
+      timerInterval = null;
+
+
+      if (mismatchTimeout) {
+
+        clearTimeout(
+          mismatchTimeout
+        );
+
+        mismatchTimeout = null;
+
+      }
+
+
+      flippedCards = [];
+
+      matchedPairs = 0;
+
+      attempts = 0;
+
+      elapsedTime = 0;
+
+      gameStarted = false;
+
+      gamePaused = false;
+
+      boardLocked = false;
+
+
+      pauseOverlay.style.display =
+        "none";
+
+      resultOverlay.style.display =
+        "none";
+
+
+      gameBoard.className =
+        `game-board size-${boardSize}`;
+
+
+      gameBoard.innerHTML = "";
+
+
+      const selectedEmojis =
+        emojis.slice(
+          0,
+          pairCount
+        );
+
+
+      const cardValues =
+        shuffle([
+          ...selectedEmojis,
+          ...selectedEmojis
+        ]);
+
+
+      cardValues.forEach(
+        (emoji, index) => {
+
+          const card =
+            document.createElement(
+              "button"
+            );
+
+
+          card.className =
+            "card";
+
+
+          card.dataset.index =
+            index;
+
+
+          card.dataset.emoji =
+            emoji;
+
+
+          card.innerHTML = `
+
+            <div class="card-inner">
+
+              <div class="card-front"></div>
+
+              <div class="card-back">
+                ${emoji}
+              </div>
+
+            </div>
+
+          `;
+
+
+          card.addEventListener(
+            "click",
+            () =>
+              handleCardClick(card)
+          );
+
+
+          gameBoard.appendChild(
+            card
+          );
+
+        }
+      );
+
+
+      updateGameUI();
+
+
+      messageElement.textContent =
+        "같은 그림의 카드를 찾아보세요!";
+
+
+      pauseButton.textContent =
+        "⏸️";
+
+
+      /*
+        게임을 다시 만들 때도
+        현재 난이도의 저장 기록을
+        다시 불러와서 표시합니다.
+      */
+
+      updateBestTime();
+
+    }
+
+
+    /* =========================
+       타이머 시작
+    ========================= */
+
+    function startTimer() {
+
+      if (gameStarted) {
+        return;
+      }
+
+
+      gameStarted = true;
+
+
+      timerInterval =
+        setInterval(() => {
+
+          if (!gamePaused) {
+
+            elapsedTime++;
+
+            timerElement.textContent =
+              formatTime(
+                elapsedTime
+              );
+
+          }
+
+        }, 1000);
+
+    }
+
+
+    /* =========================
+       카드 클릭
+    ========================= */
+
+    function handleCardClick(card) {
+
+      if (gamePaused) {
+        return;
+      }
+
+
+      if (boardLocked) {
+        return;
+      }
+
+
+      if (
+        card.classList.contains(
+          "flipped"
+        ) ||
+        card.classList.contains(
+          "matched"
+        )
+      ) {
+
+        return;
+
+      }
+
+
+      startTimer();
+
+
+      card.classList.add(
+        "flipped"
+      );
+
+
+      flippedCards.push(
+        card
+      );
+
+
+      if (
+        flippedCards.length === 2
+      ) {
+
+        attempts++;
+
+        attemptsElement.textContent =
+          attempts;
+
+        compareCards();
+
+      }
+
+    }
+
+
+    /* =========================
+       카드 비교
+    ========================= */
+
+    function compareCards() {
+
+      boardLocked = true;
+
+
+      const first =
+        flippedCards[0];
+
+      const second =
+        flippedCards[1];
+
+
+      if (
+        first.dataset.emoji ===
+        second.dataset.emoji
+      ) {
+
+        first.classList.add(
+          "matched"
+        );
+
+        second.classList.add(
+          "matched"
+        );
+
+
+        matchedPairs++;
+
+        flippedCards = [];
+
+        boardLocked = false;
+
+
+        messageElement.textContent =
+          "🎉 짝을 찾았어요!";
+
+
+        updateGameUI();
+
+
+        if (
+          matchedPairs ===
+          pairCount
+        ) {
+
+          finishGame();
+
+        }
+
+      } else {
+
+        messageElement.textContent =
+          "카드가 달라요!";
+
+
+        mismatchTimeout =
+          setTimeout(() => {
+
+            if (!gamePaused) {
+
+              first.classList.remove(
+                "flipped"
+              );
+
+              second.classList.remove(
+                "flipped"
+              );
+
+              flippedCards = [];
+
+              boardLocked = false;
+
+              mismatchTimeout = null;
+
+              messageElement.textContent =
+                "다시 찾아보세요!";
+
+            }
+
+          }, 750);
+
+      }
+
+    }
+
+
+    /* =========================
+       UI 업데이트
+    ========================= */
+
+    function updateGameUI() {
+
+      attemptsElement.textContent =
+        attempts;
+
+
+      matchesElement.textContent =
+        `${matchedPairs} / ${pairCount}`;
+
+
+      timerElement.textContent =
+        formatTime(
+          elapsedTime
+        );
+
+
+      const progress =
+        Math.round(
+          (matchedPairs /
+            pairCount) *
+          100
+        );
+
+
+      progressFill.style.width =
+        `${progress}%`;
+
+
+      progressPercent.textContent =
+        `${progress}%`;
+
+
+      updateBestTime();
+
+    }
+
+
+    /* =========================
+       일시정지
+    ========================= */
+
+    function pauseGame() {
+
+      if (!gameStarted) {
+
+        messageElement.textContent =
+          "카드를 선택하면 게임이 시작돼요!";
+
+        return;
+
+      }
+
+
+      if (gamePaused) {
+
+        resumeGame();
+
+        return;
+
+      }
+
+
+      gamePaused = true;
+
+
+      pauseOverlay.style.display =
+        "flex";
+
+
+      pauseButton.textContent =
+        "▶️";
+
+
+      messageElement.textContent =
+        "게임이 일시정지되었습니다.";
+
+    }
+
+
+    /* =========================
+       계속하기
+    ========================= */
+
+    function resumeGame() {
+
+      gamePaused = false;
+
+
+      pauseOverlay.style.display =
+        "none";
+
+
+      pauseButton.textContent =
+        "⏸️";
+
+
+      if (
+        flippedCards.length === 2 &&
+        !flippedCards[0].classList.contains(
+          "matched"
+        )
+      ) {
+
+        const first =
+          flippedCards[0];
+
+        const second =
+          flippedCards[1];
+
+
+        if (
+          first.dataset.emoji !==
+          second.dataset.emoji
+        ) {
+
+          mismatchTimeout =
+            setTimeout(() => {
+
+              first.classList.remove(
+                "flipped"
+              );
+
+              second.classList.remove(
+                "flipped"
+              );
+
+              flippedCards = [];
+
+              boardLocked = false;
+
+              mismatchTimeout = null;
+
+            }, 500);
+
+        }
+
+      }
+
+
+      messageElement.textContent =
+        "게임을 계속합니다!";
+
+    }
+
+
+    /* =========================
+       게임 종료
+    ========================= */
+
+    function finishGame() {
+
+      clearInterval(
+        timerInterval
+      );
+
+      timerInterval = null;
+
+      gameStarted = false;
+
+      boardLocked = true;
+
+
+      /*
+        현재 난이도의 기존 최저시간을
+        저장된 기록에서 가져옵니다.
+      */
+
+      const previousBest =
+        getBestTime(boardSize);
+
+
+      let isNewRecord = false;
+
+
+      /*
+        기록이 없거나
+        현재 기록이 더 빠르면 저장합니다.
+      */
+
+      if (
+        previousBest === null ||
+        elapsedTime < previousBest
+      ) {
+
+        saveBestTime(
+          boardSize,
+          elapsedTime
+        );
+
+        isNewRecord = true;
+
+      }
+
+
+      resultDifficulty.textContent =
+        `${boardSize}×${boardSize}`;
+
+
+      resultTime.textContent =
+        formatTime(
+          elapsedTime
+        );
+
+
+      resultAttempts.textContent =
+        `${attempts}회`;
+
+
+      if (isNewRecord) {
+
+        recordMessage.style.display =
+          "block";
+
+      } else {
+
+        recordMessage.style.display =
+          "none";
+
+      }
+
+
+      /*
+        기록을 저장한 직후
+        화면의 모든 기록을 갱신합니다.
+      */
+
+      updateAllRecords();
+
+      updateBestTime();
+
+
+      setTimeout(() => {
+
+        resultOverlay.style.display =
+          "flex";
+
+      }, 250);
+
+    }
+
+
+    /* =========================
+       다시 시작
+    ========================= */
+
+    restartButton.addEventListener(
+      "click",
+      () => {
+
+        createGame();
+
+      }
+    );
+
+
+    resultRestartButton.addEventListener(
+      "click",
+      () => {
+
+        resultOverlay.style.display =
+          "none";
+
+        createGame();
+
+      }
+    );
+
+
+    /* =========================
+       일시정지
+    ========================= */
+
+    pauseButton.addEventListener(
+      "click",
+      pauseGame
+    );
+
+
+    resumeButton.addEventListener(
+      "click",
+      resumeGame
+    );
+
+
+    /* =========================
+       난이도 버튼
+    ========================= */
+
+    difficultyButton.addEventListener(
+      "click",
+      () => {
+
+        if (gameStarted) {
+
+          clearInterval(
+            timerInterval
+          );
+
+        }
+
+
+        /*
+          난이도 선택창을 열 때마다
+          저장된 기록을 다시 읽어서 표시
+        */
+
+        bestRecords =
+          loadBestRecords();
+
+        updateAllRecords();
+
+
+        difficultyOverlay.style.display =
+          "flex";
+
+      }
+    );
+
+
+    /* =========================
+       난이도 변경
+    ========================= */
+
+    document
+      .querySelectorAll(
+        "[data-change-size]"
+      )
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const size =
+              Number(
+                button.dataset.changeSize
+              );
+
+
+            setDifficulty(size);
+
+
+            difficultyOverlay.style.display =
+              "none";
+
+
+            createGame();
+
+          }
+        );
+
+      });
+
+
+    /* =========================
+       처음 난이도 선택
+    ========================= */
+
+    document
+      .querySelectorAll(
+        "#startOverlay .difficulty-item"
+      )
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            document
+              .querySelectorAll(
+                "#startOverlay .difficulty-item"
+              )
+              .forEach(item => {
+
+                item.classList.remove(
+                  "selected"
+                );
+
+              });
+
+
+            button.classList.add(
+              "selected"
+            );
+
+
+            const size =
+              Number(
+                button.dataset.size
+              );
+
+
+            setDifficulty(size);
+
+          }
+        );
+
+      });
+
+
+    /* =========================
+       게임 시작
+    ========================= */
+
+    startButton.addEventListener(
+      "click",
+      () => {
+
+        startOverlay.style.display =
+          "none";
+
+        /*
+          게임 시작 직전에
+          저장된 기록을 다시 확인합니다.
+        */
+
+        bestRecords =
+          loadBestRecords();
+
+        updateAllRecords();
+
+        updateBestTime();
+
+        createGame();
+
+      }
+    );
+
+
+    /* =========================
+       모바일 확대 방지
+    ========================= */
+
+    document.addEventListener(
+      "gesturestart",
+      function(event) {
+
+        event.preventDefault();
+
+      },
+      { passive: false }
+    );
+
+
+    document.addEventListener(
+      "gesturechange",
+      function(event) {
+
+        event.preventDefault();
+
+      },
+      { passive: false }
+    );
+
+
+    document.addEventListener(
+      "gestureend",
+      function(event) {
+
+        event.preventDefault();
+
+      },
+      { passive: false }
+    );
+
+
+    let lastTouchEnd = 0;
+
+
+    document.addEventListener(
+      "touchend",
+      function(event) {
+
+        const now =
+          Date.now();
+
+
+        if (
+          now - lastTouchEnd <= 300
+        ) {
+
+          event.preventDefault();
+
+        }
+
+
+        lastTouchEnd = now;
+
+      },
+      { passive: false }
+    );
+
+
+    /* =========================
+       초기 실행
+    ========================= */
+
+    /*
+      웹앱을 다시 접속했을 때
+      localStorage에 저장되어 있는
+      최저시간 기록을 가장 먼저 불러옵니다.
+    */
+
+    bestRecords =
+      loadBestRecords();
+
+
+    setDifficulty(4);
+
+    updateAllRecords();
+
+    updateBestTime();
+
+    createGame();
+
+
+    /*
+      처음에는 난이도 선택 화면
+    */
+
+    startOverlay.style.display =
+      "flex";
+
+  </script>
+
+</body>
+</html>
